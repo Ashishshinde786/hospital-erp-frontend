@@ -1,14 +1,102 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
+  /*
+  =========================================================
+  FILE: tsconfig.app.json
+  =========================================================
+
+  PURPOSE:
+  --------
+  This file controls how Angular compiles your APPLICATION code.
+
+  It is a child config of tsconfig.json (base config).
+
+  ---------------------------------------------------------
+
+  ROLE IN BUILD PROCESS:
+  ----------------------
+  TypeScript Compiler (tsc) reads this file to:
+  - Compile .ts → .js
+  - Decide which files to include/exclude
+  - Control output directory
+
+  ---------------------------------------------------------
+
+  ARCHITECTURE:
+  -------------
+  tsconfig.json        → Base config (global rules)
+  tsconfig.app.json    → App-specific config (this file)
+  tsconfig.spec.json   → Test config
+
+  =========================================================
+  */
+
+  /*
+  =========================================================
+  INHERIT FROM BASE CONFIG
+  =========================================================
+
+  Reuse common settings from tsconfig.json
+  */
   "extends": "./tsconfig.json",
+
   "compilerOptions": {
+
+    /*
+    ---------------------------------------------------------
+    OUTPUT DIRECTORY
+    ---------------------------------------------------------
+
+    Compiled JS files go here:
+
+    src/app/*.ts → out-tsc/app/*.js
+
+    NOTE:
+    Angular CLI later bundles these files
+    */
     "outDir": "./out-tsc/app",
+
+
+
+    /*
+    ---------------------------------------------------------
+    TYPES
+    ---------------------------------------------------------
+
+    Empty array means:
+    - Do NOT include extra type definitions globally
+
+    WHY?
+    ----
+    Keeps app bundle clean
+    Avoids unnecessary typings
+    */
     "types": []
   },
+
+
+
+  /*
+  =========================================================
+  INCLUDE FILES
+  =========================================================
+
+  Compile ALL TypeScript files inside src/
+  */
   "include": [
     "src/**/*.ts"
   ],
+
+
+
+  /*
+  =========================================================
+  EXCLUDE FILES
+  =========================================================
+
+  Do NOT compile test files
+
+  *.spec.ts → unit test files
+  */
   "exclude": [
     "src/**/*.spec.ts"
   ]
