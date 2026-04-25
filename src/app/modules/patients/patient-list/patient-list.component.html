@@ -1,0 +1,126 @@
+<!-- src/app/modules/patients/patient-list/patient-list.component.html -->
+<div class="page-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <h2>👥 Patient Management</h2>
+      <p>{{ patients.length }} total patients registered</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      ＋ Add Patient
+    </button>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert alert-success" *ngIf="successMessage">✅ {{ successMessage }}</div>
+  <div class="alert alert-danger"  *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search by name, phone, email..."
+          [(ngModel)]="searchQuery"
+          (input)="applySearch()"
+          style="width:300px"
+        />
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <span class="text-muted" style="font-size:0.85rem">
+        Showing {{ filtered.length }} of {{ patients.length }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner spinner-primary"></div>
+      <span>Loading patients...</span>
+    </div>
+
+    <div class="table-container" *ngIf="!loading">
+      <table *ngIf="filtered.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Age / Gender</th>
+            <th>Blood Group</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filtered; let i = index">
+            <td class="text-muted font-mono">{{ p.id }}</td>
+            <td>
+              <div class="patient-name-cell">
+                <div class="mini-avatar">{{ p.firstName.charAt(0) }}{{ p.lastName.charAt(0) }}</div>
+                <span class="font-bold">{{ p.firstName }} {{ p.lastName }}</span>
+              </div>
+            </td>
+            <td>
+              {{ getAge(p.dateOfBirth) }} yrs &nbsp;
+              <span class="badge" [ngClass]="{
+                'badge-info':    p.gender === 'MALE',
+                'badge-warning': p.gender === 'FEMALE',
+                'badge-muted':   p.gender === 'OTHER'
+              }">{{ p.gender }}</span>
+            </td>
+            <td>
+              <span class="badge badge-danger" *ngIf="p.bloodGroup">{{ p.bloodGroup }}</span>
+              <span class="text-muted" *ngIf="!p.bloodGroup">—</span>
+            </td>
+            <td class="font-mono">{{ p.phone || '—' }}</td>
+            <td class="text-muted">{{ p.email || '—' }}</td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn-icon" (click)="openEdit(p)" title="Edit">✏️</button>
+                <button class="btn-icon" (click)="confirmDelete(p.id!)" title="Delete" style="color:var(--danger)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-state" *ngIf="filtered.length === 0">
+        <div class="empty-icon">👥</div>
+        <h4>No patients found</h4>
+        <p>{{ searchQuery ? 'Try a different search term' : 'Add your first patient to get started' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patient Form Modal -->
+  <app-patient-form
+    *ngIf="showForm"
+    [patient]="editingPatient"
+    (saved)="onFormSaved()"
+    (cancelled)="onFormCancelled()"
+  ></app-patient-form>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" *ngIf="deleteConfirmId">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <h3>🗑️ Confirm Delete</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this patient? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="doDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>

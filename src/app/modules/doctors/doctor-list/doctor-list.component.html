@@ -1,0 +1,93 @@
+<!-- src/app/modules/doctors/doctor-list/doctor-list.component.html -->
+<div class="page-container">
+
+  <div class="page-header">
+    <div class="page-title">
+      <h2>👨‍⚕️ Doctor Management</h2>
+      <p>{{ doctors.length }} doctors registered</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">＋ Add Doctor</button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMessage">✅ {{ successMessage }}</div>
+  <div class="alert alert-danger"  *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control" placeholder="Search by name, specialization..."
+          [(ngModel)]="searchQuery" (input)="applyFilter()" style="width:300px" />
+      </div>
+      <label class="toggle-filter">
+        <input type="checkbox" [(ngModel)]="filterAvailable" (change)="applyFilter()" />
+        <span>Available only</span>
+      </label>
+    </div>
+    <div class="toolbar-right">
+      <span class="text-muted" style="font-size:0.85rem">Showing {{ filtered.length }} of {{ doctors.length }}</span>
+    </div>
+  </div>
+
+  <!-- Cards View -->
+  <div class="doctor-grid" *ngIf="!loading && filtered.length > 0">
+    <div class="doctor-card" *ngFor="let d of filtered">
+      <div class="doctor-card-header">
+        <div class="doctor-avatar">{{ d.firstName.charAt(0) }}{{ d.lastName.charAt(0) }}</div>
+        <div class="avail-dot" [class.available]="d.available" [class.unavailable]="!d.available"
+          [title]="d.available ? 'Available' : 'Unavailable'"></div>
+      </div>
+      <div class="doctor-card-body">
+        <h4>Dr. {{ d.firstName }} {{ d.lastName }}</h4>
+        <p class="specialization">{{ d.specialization }}</p>
+        <p class="qualification text-muted">{{ d.qualification || '—' }}</p>
+        <div class="doctor-meta">
+          <span class="meta-item" *ngIf="d.phone">📞 {{ d.phone }}</span>
+          <span class="meta-item" *ngIf="d.email">✉️ {{ d.email }}</span>
+          <span class="meta-item">🪪 {{ d.licenseNumber }}</span>
+        </div>
+      </div>
+      <div class="doctor-card-footer">
+        <span class="badge" [ngClass]="d.available ? 'badge-success' : 'badge-muted'">
+          {{ d.available ? 'Available' : 'Unavailable' }}
+        </span>
+        <div class="actions-cell">
+          <button class="btn-icon" (click)="openEdit(d)" title="Edit">✏️</button>
+          <button class="btn-icon" (click)="confirmDelete(d.id!)" title="Delete" style="color:var(--danger)">🗑️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner spinner-primary"></div><span>Loading doctors...</span>
+  </div>
+
+  <div class="card" *ngIf="!loading && filtered.length === 0">
+    <div class="empty-state">
+      <div class="empty-icon">👨‍⚕️</div>
+      <h4>No doctors found</h4>
+      <p>{{ searchQuery ? 'Try a different search' : 'Add your first doctor to get started' }}</p>
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  <app-doctor-form *ngIf="showForm"
+    [doctor]="editingDoctor"
+    (saved)="onFormSaved()"
+    (cancelled)="onFormCancelled()">
+  </app-doctor-form>
+
+  <!-- Delete Confirm -->
+  <div class="modal-overlay" *ngIf="deleteConfirmId">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header"><h3>🗑️ Confirm Delete</h3></div>
+      <div class="modal-body"><p>Are you sure you want to delete this doctor?</p></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="doDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>

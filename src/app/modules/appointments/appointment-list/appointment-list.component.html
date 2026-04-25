@@ -1,0 +1,130 @@
+<!-- src/app/modules/appointments/appointment-list/appointment-list.component.html -->
+<div class="page-container">
+
+  <div class="page-header">
+    <div class="page-title">
+      <h2>📅 Appointments</h2>
+      <p>{{ appointments.length }} total appointments</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">＋ Book Appointment</button>
+  </div>
+
+  <!-- Mini Stats -->
+  <div class="appt-stats">
+    <div class="appt-stat appt-stat--scheduled">
+      <span class="stat-num">{{ scheduledCount }}</span>
+      <span class="stat-lbl">Scheduled</span>
+    </div>
+    <div class="appt-stat appt-stat--completed">
+      <span class="stat-num">{{ completedCount }}</span>
+      <span class="stat-lbl">Completed</span>
+    </div>
+    <div class="appt-stat appt-stat--cancelled">
+      <span class="stat-num">{{ cancelledCount }}</span>
+      <span class="stat-lbl">Cancelled</span>
+    </div>
+    <div class="appt-stat appt-stat--total">
+      <span class="stat-num">{{ appointments.length }}</span>
+      <span class="stat-lbl">Total</span>
+    </div>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMessage">✅ {{ successMessage }}</div>
+  <div class="alert alert-danger"  *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control" placeholder="Search patient, doctor, reason..."
+          [(ngModel)]="searchQuery" (input)="applyFilter()" style="width:280px" />
+      </div>
+      <select class="form-control" [(ngModel)]="filterStatus" (change)="applyFilter()" style="width:160px">
+        <option value="">All Statuses</option>
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+    <div class="toolbar-right">
+      <span class="text-muted" style="font-size:0.85rem">Showing {{ filtered.length }} of {{ appointments.length }}</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner spinner-primary"></div><span>Loading appointments...</span>
+    </div>
+
+    <div class="table-container" *ngIf="!loading">
+      <table *ngIf="filtered.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Specialization</th>
+            <th>Date & Time</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of filtered">
+            <td class="text-muted font-mono">{{ a.id }}</td>
+            <td class="font-bold">{{ a.patientName }}</td>
+            <td>Dr. {{ a.doctorName }}</td>
+            <td class="text-muted">{{ a.doctorSpecialization }}</td>
+            <td class="font-mono" style="font-size:0.8rem">
+              {{ a.appointmentDateTime | date:'dd MMM yyyy' }}<br/>
+              <span class="text-muted">{{ a.appointmentDateTime | date:'hh:mm a' }}</span>
+            </td>
+            <td class="text-muted" style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              {{ a.reason || '—' }}
+            </td>
+            <td>
+              <select class="status-select" [ngClass]="'status-' + a.status?.toLowerCase()"
+                [value]="a.status"
+                (change)="updateStatus(a.id!, $any($event.target).value)">
+                <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+              </select>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn-icon" (click)="openEdit(a)" title="Edit">✏️</button>
+                <button class="btn-icon" (click)="confirmDelete(a.id!)" title="Delete" style="color:var(--danger)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-state" *ngIf="filtered.length === 0">
+        <div class="empty-icon">📅</div>
+        <h4>No appointments found</h4>
+        <p>{{ searchQuery || filterStatus ? 'Try different filters' : 'Book the first appointment' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  <app-appointment-form *ngIf="showForm"
+    [appointment]="editingAppointment"
+    (saved)="onFormSaved()"
+    (cancelled)="onFormCancelled()">
+  </app-appointment-form>
+
+  <!-- Delete Confirm -->
+  <div class="modal-overlay" *ngIf="deleteConfirmId">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header"><h3>🗑️ Confirm Delete</h3></div>
+      <div class="modal-body"><p>Are you sure you want to delete this appointment?</p></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="doDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>

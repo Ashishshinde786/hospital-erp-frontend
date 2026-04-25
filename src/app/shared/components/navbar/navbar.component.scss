@@ -1,0 +1,102 @@
+/* src/app/shared/components/navbar/navbar.component.scss */
+
+.navbar {
+  height: var(--navbar-height);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: all 0.15s;
+
+  &:hover {
+    background: var(--bg-base);
+    color: var(--primary);
+  }
+}
+
+.page-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.datetime {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+
+  @media (max-width: 600px) { display: none; }
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.4rem;
+  border-radius: 999px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+}
+
+.user-avatar-sm {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+
+  .user-name-sm {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .user-role-badge {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}

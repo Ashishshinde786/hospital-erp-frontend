@@ -1,0 +1,177 @@
+<!-- src/app/modules/billing/invoice-list/invoice-list.component.html -->
+<div class="page-container">
+
+  <div class="page-header">
+    <div class="page-title">
+      <h2>🧾 Billing & Invoices</h2>
+      <p>{{ invoices.length }} total invoices</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">＋ Create Invoice</button>
+  </div>
+
+  <!-- Revenue Stats -->
+  <div class="billing-stats">
+    <div class="billing-stat revenue">
+      <div class="stat-icon">💰</div>
+      <div>
+        <div class="stat-value">₹{{ totalRevenue | number:'1.0-2' }}</div>
+        <div class="stat-label">Total Revenue Collected</div>
+      </div>
+    </div>
+    <div class="billing-stat pending-stat">
+      <div class="stat-icon">⏳</div>
+      <div>
+        <div class="stat-value">{{ pendingCount }}</div>
+        <div class="stat-label">Pending Invoices</div>
+      </div>
+    </div>
+    <div class="billing-stat paid-stat">
+      <div class="stat-icon">✅</div>
+      <div>
+        <div class="stat-value">{{ paidCount }}</div>
+        <div class="stat-label">Paid Invoices</div>
+      </div>
+    </div>
+    <div class="billing-stat partial-stat">
+      <div class="stat-icon">🔄</div>
+      <div>
+        <div class="stat-value">{{ partialCount }}</div>
+        <div class="stat-label">Partial Payments</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMessage">✅ {{ successMessage }}</div>
+  <div class="alert alert-danger"  *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control" placeholder="Search by patient name or invoice ID..."
+          [(ngModel)]="searchQuery" (input)="applyFilter()" style="width:280px" />
+      </div>
+      <select class="form-control" [(ngModel)]="filterStatus" (change)="applyFilter()" style="width:150px">
+        <option value="">All Statuses</option>
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+    <div class="toolbar-right">
+      <span class="text-muted" style="font-size:0.85rem">Showing {{ filtered.length }} of {{ invoices.length }}</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner spinner-primary"></div><span>Loading invoices...</span>
+    </div>
+
+    <div class="table-container" *ngIf="!loading">
+      <table *ngIf="filtered.length > 0">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Patient</th>
+            <th>Total Amount</th>
+            <th>Paid Amount</th>
+            <th>Outstanding</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of filtered">
+            <td class="font-mono font-bold" style="color:var(--primary)">#{{ inv.id }}</td>
+            <td class="font-bold">{{ inv.patientName }}</td>
+            <td class="font-mono">₹{{ inv.totalAmount | number:'1.0-2' }}</td>
+            <td class="font-mono text-success">₹{{ inv.paidAmount | number:'1.0-2' }}</td>
+            <td class="font-mono" [class.text-danger]="getOutstanding(inv) > 0">
+              ₹{{ getOutstanding(inv) | number:'1.0-2' }}
+            </td>
+            <td>
+              <span *ngIf="inv.paymentMethod" class="badge badge-muted">{{ inv.paymentMethod }}</span>
+              <span *ngIf="!inv.paymentMethod" class="text-muted">—</span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="getStatusBadge(inv.paymentStatus || '')">
+                {{ inv.paymentStatus }}
+              </span>
+            </td>
+            <td>
+              <div class="actions-cell">
+                <button class="btn btn-sm btn-success"
+                  *ngIf="inv.paymentStatus !== 'PAID' && inv.paymentStatus !== 'CANCELLED'"
+                  (click)="openPayment(inv)">
+                  💳 Pay
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="empty-state" *ngIf="filtered.length === 0">
+        <div class="empty-icon">🧾</div>
+        <h4>No invoices found</h4>
+        <p>{{ searchQuery || filterStatus ? 'Try different filters' : 'Create the first invoice' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invoice Form Modal -->
+  <app-invoice-form *ngIf="showForm"
+    (saved)="onFormSaved()"
+    (cancelled)="onFormCancelled()">
+  </app-invoice-form>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay" *ngIf="showPaymentModal">
+    <div class="modal" style="max-width:440px">
+      <div class="modal-header">
+        <h3>💳 Process Payment</h3>
+        <button class="btn-icon" (click)="showPaymentModal = false">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedInvoice">
+        <div class="payment-summary">
+          <div class="pay-row">
+            <span>Patient</span>
+            <span class="font-bold">{{ selectedInvoice.patientName }}</span>
+          </div>
+          <div class="pay-row">
+            <span>Invoice Total</span>
+            <span class="font-bold">₹{{ selectedInvoice.totalAmount | number:'1.0-2' }}</span>
+          </div>
+          <div class="pay-row">
+            <span>Already Paid</span>
+            <span class="text-success font-bold">₹{{ selectedInvoice.paidAmount | number:'1.0-2' }}</span>
+          </div>
+          <div class="pay-row outstanding">
+            <span>Outstanding</span>
+            <span class="text-danger font-bold">₹{{ getOutstanding(selectedInvoice) | number:'1.0-2' }}</span>
+          </div>
+        </div>
+
+        <div class="form-group mt-2">
+          <label>Payment Amount (₹)</label>
+          <input type="number" class="form-control" [(ngModel)]="paymentAmount"
+            [max]="getOutstanding(selectedInvoice)" min="1" step="0.01" />
+        </div>
+
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select class="form-control" [(ngModel)]="paymentMethod">
+            <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="showPaymentModal = false">Cancel</button>
+        <button class="btn btn-success" (click)="processPayment()">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+</div>

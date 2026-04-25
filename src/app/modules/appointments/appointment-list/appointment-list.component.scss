@@ -1,0 +1,62 @@
+/* src/app/modules/appointments/appointment-list/appointment-list.component.scss */
+
+.page-container { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* Mini stats bar */
+.appt-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.appt-stat {
+  flex: 1;
+  min-width: 120px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  border-left: 4px solid transparent;
+  box-shadow: var(--shadow-sm);
+
+  .stat-num {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-lbl {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  &--scheduled { border-left-color: #60a5fa; .stat-num { color: #1d4ed8; } }
+  &--completed { border-left-color: #4ade80; .stat-num { color: var(--success); } }
+  &--cancelled { border-left-color: #f87171; .stat-num { color: var(--danger); } }
+  &--total     { border-left-color: var(--primary); .stat-num { color: var(--primary); } }
+}
+
+/* Inline status dropdown */
+.status-select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+
+  &.status-scheduled { background: #dbeafe; color: #1d4ed8; }
+  &.status-confirmed  { background: #ede9fe; color: #6d28d9; }
+  &.status-completed  { background: #dcfce7; color: #15803d; }
+  &.status-cancelled  { background: #fee2e2; color: #b91c1c; }
+  &.status-no_show    { background: #fef3c7; color: #b45309; }
+}

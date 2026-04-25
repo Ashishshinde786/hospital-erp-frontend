@@ -1,0 +1,115 @@
+/* src/app/modules/doctors/doctor-list/doctor-list.component.scss */
+
+.page-container { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.toggle-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  input { cursor: pointer; accent-color: var(--primary); }
+}
+
+/* Doctor Cards Grid */
+.doctor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.doctor-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.doctor-card-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.doctor-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+
+.avail-dot {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+
+  &.available   { background: #4ade80; }
+  &.unavailable { background: #f87171; }
+}
+
+.doctor-card-body {
+  padding: 1.25rem;
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .specialization {
+    font-size: 0.875rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .qualification {
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.doctor-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  .meta-item {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.doctor-card-footer {
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

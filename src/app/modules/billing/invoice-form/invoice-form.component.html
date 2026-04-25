@@ -1,0 +1,95 @@
+<!-- src/app/modules/billing/invoice-form/invoice-form.component.html -->
+<div class="modal-overlay">
+  <div class="modal modal-lg">
+
+    <div class="modal-header">
+      <h3>➕ Create New Invoice</h3>
+      <button class="btn-icon" (click)="cancelled.emit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="loading-container" *ngIf="loadingPatients">
+        <div class="spinner spinner-primary"></div><span>Loading patients...</span>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loadingPatients">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Patient *</label>
+            <select class="form-control" formControlName="patientId">
+              <option value="">Select Patient</option>
+              <option *ngFor="let p of patients" [value]="p.id">
+                {{ p.firstName }} {{ p.lastName }}
+              </option>
+            </select>
+            <span class="error-text" *ngIf="form.get('patientId')?.touched && form.get('patientId')?.invalid">Required</span>
+          </div>
+          <div class="form-group">
+            <label>Appointment ID (optional)</label>
+            <input type="number" class="form-control" formControlName="appointmentId"
+              placeholder="Link to appointment ID" />
+          </div>
+        </div>
+
+        <!-- Line Items -->
+        <div class="items-section">
+          <div class="items-header">
+            <h4>📋 Invoice Line Items</h4>
+            <button type="button" class="btn btn-outline btn-sm" (click)="addItem()">＋ Add Item</button>
+          </div>
+
+          <div class="items-table-header">
+            <span style="flex:2">Description</span>
+            <span style="flex:1">Type</span>
+            <span style="flex:0.5; text-align:center">Qty</span>
+            <span style="flex:0.8; text-align:right">Unit Price</span>
+            <span style="flex:0.8; text-align:right">Total</span>
+            <span style="flex:0.3"></span>
+          </div>
+
+          <div formArrayName="items">
+            <div class="item-row" *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
+              <input type="text" class="form-control" formControlName="description"
+                placeholder="e.g. Consultation Fee" style="flex:2" />
+
+              <select class="form-control" formControlName="itemType" style="flex:1">
+                <option *ngFor="let t of itemTypes" [value]="t">{{ t }}</option>
+              </select>
+
+              <input type="number" class="form-control" formControlName="quantity"
+                min="1" style="flex:0.5; text-align:center" />
+
+              <input type="number" class="form-control" formControlName="unitPrice"
+                min="0" step="0.01" placeholder="0.00" style="flex:0.8; text-align:right" />
+
+              <div class="item-total" style="flex:0.8; text-align:right;">
+                ₹{{ (item.get('quantity')?.value * item.get('unitPrice')?.value) | number:'1.0-2' }}
+              </div>
+
+              <button type="button" class="btn-icon" (click)="removeItem(i)"
+                [disabled]="items.length === 1" style="color:var(--danger); flex:0.3">🗑️</button>
+            </div>
+          </div>
+
+          <div class="total-row">
+            <span>Grand Total</span>
+            <span class="grand-total">₹{{ totalAmount | number:'1.0-2' }}</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" (click)="cancelled.emit()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span class="spinner" *ngIf="loading"></span>
+            Create Invoice
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

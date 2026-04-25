@@ -1,0 +1,22 @@
+<header class="navbar">
+  <div class="navbar-left">
+    <button class="toggle-btn" (click)="toggleSidebar.emit()" title="Toggle Sidebar">
+      ☰
+    </button>
+    <div class="page-info">
+      <h2 class="page-title">{{ pageTitle }}</h2>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+    <div class="datetime">{{ currentTime }}</div>
+
+    <div class="user-pill">
+      <div class="user-avatar-sm">{{ username.charAt(0).toUpperCase() }}</div>
+      <div class="user-meta">
+        <span class="user-name-sm">{{ username }}</span>
+        <span class="user-role-badge">{{ role }}</span>
+      </div>
+    </div>
+  </div>
+</header>

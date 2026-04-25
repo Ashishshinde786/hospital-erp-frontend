@@ -1,0 +1,141 @@
+<!-- src/app/modules/dashboard/dashboard.component.html -->
+<div class="dashboard">
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner spinner-primary"></div>
+    <span>Loading dashboard...</span>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Stats Grid -->
+    <div class="stat-grid">
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dbeafe;">👥</div>
+        <div class="stat-content">
+          <h3>{{ stats.totalPatients }}</h3>
+          <p>Total Patients</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#dcfce7;">👨‍⚕️</div>
+        <div class="stat-content">
+          <h3>{{ stats.totalDoctors }}</h3>
+          <p>Doctors ({{ stats.availableDoctors }} available)</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fef3c7;">📅</div>
+        <div class="stat-content">
+          <h3>{{ stats.totalAppointments }}</h3>
+          <p>Total Appointments</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#f0fdf4;">💰</div>
+        <div class="stat-content">
+          <h3>₹{{ stats.totalRevenue | number:'1.0-0' }}</h3>
+          <p>Total Revenue</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
+        <div class="stat-content">
+          <h3>{{ stats.lowStockMedicines }}</h3>
+          <p>Low Stock Alerts</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="dashboard-grid">
+
+      <!-- Recent Appointments -->
+      <div class="card">
+        <div class="card-header">
+          <h3>📅 Recent Appointments</h3>
+          <a routerLink="/appointments" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="table-container">
+          <table *ngIf="recentAppointments.length > 0">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Date/Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of recentAppointments">
+                <td>{{ a.patientName }}</td>
+                <td>Dr. {{ a.doctorName }}</td>
+                <td>{{ a.appointmentDateTime | date:'dd MMM, hh:mm a' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="getStatusBadge(a.status)">{{ a.status }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="empty-state" *ngIf="recentAppointments.length === 0">
+            <div class="empty-icon">📅</div>
+            <h4>No appointments yet</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side Column -->
+      <div class="side-column">
+
+        <!-- Recent Patients -->
+        <div class="card">
+          <div class="card-header">
+            <h3>👥 Recent Patients</h3>
+            <a routerLink="/patients" class="btn btn-ghost btn-sm">View All →</a>
+          </div>
+          <div class="patient-list">
+            <div class="patient-item" *ngFor="let p of recentPatients">
+              <div class="patient-avatar">{{ p.firstName.charAt(0) }}{{ p.lastName.charAt(0) }}</div>
+              <div class="patient-info">
+                <span class="patient-name">{{ p.firstName }} {{ p.lastName }}</span>
+                <span class="patient-meta">{{ p.gender }} · {{ p.bloodGroup || '—' }}</span>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="recentPatients.length === 0">
+              <div class="empty-icon">👥</div>
+              <h4>No patients yet</h4>
+            </div>
+          </div>
+        </div>
+
+        <!-- Low Stock Alerts -->
+        <div class="card" *ngIf="lowStockMedicines.length > 0">
+          <div class="card-header">
+            <h3>⚠️ Low Stock Medicines</h3>
+            <a routerLink="/pharmacy" class="btn btn-ghost btn-sm">Manage →</a>
+          </div>
+          <div class="low-stock-list">
+            <div class="low-stock-item" *ngFor="let m of lowStockMedicines">
+              <div class="medicine-info">
+                <span class="medicine-name">{{ m.name }}</span>
+                <span class="medicine-cat">{{ m.category || 'General' }}</span>
+              </div>
+              <span class="stock-badge" [class.critical]="m.stockQuantity < 5">
+                {{ m.stockQuantity }} left
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+</div>

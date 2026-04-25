@@ -1,0 +1,109 @@
+/* src/app/modules/dashboard/dashboard.component.scss */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.25rem;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Patient list in dashboard */
+.patient-list {
+  padding: 0.5rem 0;
+}
+
+.patient-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--bg-base); }
+}
+
+.patient-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.patient-info {
+  display: flex;
+  flex-direction: column;
+
+  .patient-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .patient-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+}
+
+/* Low stock */
+.low-stock-list {
+  padding: 0.25rem 0;
+}
+
+.low-stock-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child { border-bottom: none; }
+}
+
+.medicine-info {
+  display: flex;
+  flex-direction: column;
+
+  .medicine-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .medicine-cat {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+}
+
+.stock-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #b45309;
+
+  &.critical {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+}

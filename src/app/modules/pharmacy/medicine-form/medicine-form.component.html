@@ -1,0 +1,72 @@
+<!-- src/app/modules/pharmacy/medicine-form/medicine-form.component.html -->
+<div class="modal-overlay">
+  <div class="modal modal-lg">
+
+    <div class="modal-header">
+      <h3>{{ isEdit ? '✏️ Edit Medicine' : '➕ Add Medicine' }}</h3>
+      <button class="btn-icon" (click)="cancelled.emit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="alert alert-danger" *ngIf="error">⚠️ {{ error }}</div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Medicine Name *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="e.g. Paracetamol 500mg" />
+            <span class="error-text" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">Required</span>
+          </div>
+          <div class="form-group">
+            <label>Manufacturer</label>
+            <input type="text" class="form-control" formControlName="manufacturer" placeholder="e.g. Cipla, Sun Pharma" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select class="form-control" formControlName="category">
+              <option value="">Select Category</option>
+              <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Price (₹) *</label>
+            <input type="number" class="form-control" formControlName="price"
+              min="0.01" step="0.01" placeholder="0.00" />
+            <span class="error-text" *ngIf="form.get('price')?.touched && form.get('price')?.invalid">Required, must be &gt; 0</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Stock Quantity *</label>
+            <input type="number" class="form-control" formControlName="stockQuantity" min="0" placeholder="0" />
+            <span class="error-text" *ngIf="form.get('stockQuantity')?.touched && form.get('stockQuantity')?.invalid">Required, cannot be negative</span>
+          </div>
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="date" class="form-control" formControlName="expiryDate" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Batch Number</label>
+          <input type="text" class="form-control" formControlName="batchNumber" placeholder="e.g. BATCH-2024-001" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" (click)="cancelled.emit()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="loading">
+            <span class="spinner" *ngIf="loading"></span>
+            {{ isEdit ? 'Update Medicine' : 'Add Medicine' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

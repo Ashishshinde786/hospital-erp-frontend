@@ -1,0 +1,103 @@
+<!-- src/app/modules/auth/login/login.component.html -->
+<div class="login-page">
+
+  <div class="login-left">
+    <div class="brand">
+      <div class="brand-icon">🏥</div>
+      <h1>Hospital ERP</h1>
+      <p>Integrated Healthcare Management System</p>
+    </div>
+
+    <div class="features">
+      <div class="feature-item">
+        <span class="feature-icon">👥</span>
+        <div>
+          <h4>Patient Management</h4>
+          <p>Complete patient records and history</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">📅</span>
+        <div>
+          <h4>Appointment Scheduling</h4>
+          <p>Smart scheduling for doctors and patients</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">💊</span>
+        <div>
+          <h4>Pharmacy & Billing</h4>
+          <p>Inventory control and invoicing</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to your account to continue</p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">
+        ⚠️ {{ error }}
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+          <label>Username</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="username"
+              placeholder="Enter username"
+              autocomplete="username"
+            />
+          </div>
+          <span class="error-text" *ngIf="form.get('username')?.touched && form.get('username')?.invalid">
+            Username is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              formControlName="password"
+              placeholder="Enter password"
+              autocomplete="current-password"
+            />
+            <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          <span class="error-text" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+            Password is required
+          </span>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary login-btn"
+          [disabled]="loading || form.invalid"
+        >
+          <span class="spinner" *ngIf="loading"></span>
+          {{ loading ? 'Signing in...' : 'Sign In' }}
+        </button>
+
+      </form>
+
+      <div class="login-hint">
+        <p>🔐 Secure JWT-based authentication</p>
+      </div>
+    </div>
+  </div>
+
+</div>
