@@ -1,367 +1,260 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { DoctorService } from '../../../core/services/doctor.service';
-import { Doctor } from '../../../core/models/models';
-import { DoctorFormComponent } from '../doctor-form/doctor-form.component';
+import {
+  Component,
+  OnInit
+} from '@angular/core';
 
-/*
-=========================================================
-COMPONENT: DoctorListComponent
-=========================================================
+import { CommonModule }
+  from '@angular/common';
 
-PURPOSE:
---------
-This component manages the Doctor Management module.
+import { FormsModule }
+  from '@angular/forms';
 
-It handles:
-- Fetching doctors from backend
-- Displaying doctors (card view)
-- Searching & filtering
-- Creating / Editing doctors (modal)
-- Deleting doctors (with confirmation)
-- Showing success/error messages
+import { DoctorService }
+  from '../../../core/services/doctor.service';
 
----------------------------------------------------------
+import { Doctor }
+  from '../../../core/models/models';
 
-ARCHITECTURE FLOW:
-------------------
-UI (HTML Template)
-        ↓
-DoctorListComponent (this file)
-        ↓
-DoctorService (API calls)
-        ↓
-Backend
-
----------------------------------------------------------
-
-RELATIONSHIP:
--------------
-Doctor is a CORE ENTITY used in:
-- Appointment module (doctor selection)
-- Dashboard (stats)
-- Billing (reference)
-
----------------------------------------------------------
-
-KEY CONCEPTS:
--------------
-- Standalone Component
-- State management (local state)
-- Template-driven forms (ngModel)
-- Immutable updates (spread operator)
-- CRUD operations
-- Parent ↔ Child communication
-- Filtering logic
-
-=========================================================
-*/
+import { DoctorFormComponent }
+  from '../doctor-form/doctor-form.component';
 
 @Component({
+
   selector: 'app-doctor-list',
+
   standalone: true,
-  imports: [CommonModule, FormsModule, DoctorFormComponent],
-  templateUrl: './doctor-list.component.html',
-  styleUrls: ['./doctor-list.component.scss']
+
+  imports: [
+    CommonModule,
+    FormsModule,
+    DoctorFormComponent
+  ],
+
+  templateUrl:
+    './doctor-list.component.html',
+
+  styleUrls: [
+    './doctor-list.component.scss'
+  ]
 })
-export class DoctorListComponent implements OnInit {
+export class DoctorListComponent
+implements OnInit {
 
-  /*
-  =========================================================
-  STATE: DATA
-  =========================================================
-  */
-  doctors: Doctor[] = [];   // Original data from backend
-  filtered: Doctor[] = [];  // Filtered data for UI
+  doctors: Doctor[] = [];
 
+  filtered: Doctor[] = [];
 
-
-  /*
-  =========================================================
-  UI STATE
-  =========================================================
-  */
   loading = false;
 
-
-
-  /*
-  =========================================================
-  FILTER STATE
-  =========================================================
-  */
   searchQuery = '';
+
   filterAvailable = false;
 
-
-
-  /*
-  =========================================================
-  MODAL STATE
-  =========================================================
-  */
   showForm = false;
+
   editingDoctor: Doctor | null = null;
 
-
-
-  /*
-  =========================================================
-  DELETE STATE
-  =========================================================
-  */
   deleteConfirmId: number | null = null;
 
-
-
-  /*
-  =========================================================
-  UI MESSAGES
-  =========================================================
-  */
   successMessage = '';
+
   errorMessage = '';
 
+  constructor(
 
+    private doctorService: DoctorService
 
-  /*
-  =========================================================
-  DEPENDENCY INJECTION
-  =========================================================
-  */
-  constructor(private doctorService: DoctorService) {}
+  ) {}
 
-
-
-  /*
-  =========================================================
-  LIFECYCLE: ngOnInit
-  =========================================================
-  */
   ngOnInit(): void {
+
     this.loadDoctors();
   }
 
-
-
-  /*
-  =========================================================
-  LOAD DOCTORS
-  =========================================================
-
-  FLOW:
-  -----
-  1. Show loading
-  2. Call API
-  3. Store data
-  4. Apply filters
-  5. Stop loading
-
-  =========================================================
-  */
   loadDoctors(): void {
 
     this.loading = true;
 
-    this.doctorService.getAll().subscribe({
+    this.errorMessage = '';
 
-      // SUCCESS
-      next: (res) => {
+    this.doctorService.getAll()
+      .subscribe({
 
-        this.doctors = res.data || [];
+        next: (res) => {
 
-        // Apply filter after loading
-        this.applyFilter();
+          this.doctors =
+            res.data || [];
 
-        this.loading = false;
-      },
+          this.applyFilter();
 
-      // ERROR
-      error: () => {
-        this.loading = false;
-      }
-    });
+          this.loading = false;
+        },
+
+        error: (err) => {
+
+          console.error(
+            'Doctor Load Error',
+            err
+          );
+
+          this.errorMessage =
+
+            err?.error?.message
+
+            ||
+
+            'Failed to load doctors.';
+
+          this.loading = false;
+        }
+      });
   }
 
-
-
-  /*
-  =========================================================
-  APPLY FILTER
-  =========================================================
-
-  Filters:
-  - Availability (checkbox)
-  - Search query (name, specialization, license)
-
-  IMPORTANT:
-  ----------
-  Always filter from original list
-
-  =========================================================
-  */
   applyFilter(): void {
 
-    // Clone original list
     let list = [...this.doctors];
 
-
-
     /*
-    -----------------------------------------------------
-    FILTER: AVAILABLE ONLY
-    -----------------------------------------------------
-    */
+     * Available filter
+     */
     if (this.filterAvailable) {
-      list = list.filter(d => d.available);
-    }
 
+      list = list.filter(
 
-
-    /*
-    -----------------------------------------------------
-    SEARCH FILTER
-    -----------------------------------------------------
-    */
-    const q = this.searchQuery.toLowerCase().trim();
-
-    if (q) {
-      list = list.filter(d =>
-        `${d.firstName} ${d.lastName}`.toLowerCase().includes(q) ||
-        d.specialization.toLowerCase().includes(q) ||
-        d.licenseNumber.toLowerCase().includes(q)
+        doctor => doctor.available
       );
     }
 
+    /*
+     * Search filter
+     */
+    const query =
 
+      this.searchQuery
+        .toLowerCase()
+        .trim();
 
-    // Update UI list
+    if (query) {
+
+      list = list.filter(doctor =>
+
+        `${doctor.firstName} ${doctor.lastName}`
+          .toLowerCase()
+          .includes(query)
+
+        ||
+
+        doctor.specialization
+          .toLowerCase()
+          .includes(query)
+
+        ||
+
+        doctor.licenseNumber
+          .toLowerCase()
+          .includes(query)
+      );
+    }
+
     this.filtered = list;
   }
 
-
-
-  /*
-  =========================================================
-  CREATE / EDIT FLOW
-  =========================================================
-  */
-
-  /*
-  Open create modal
-  */
   openCreate(): void {
+
     this.editingDoctor = null;
+
     this.showForm = true;
   }
 
+  openEdit(doctor: Doctor): void {
 
+    this.editingDoctor = {
+      ...doctor
+    };
 
-  /*
-  Open edit modal
-  IMPORTANT: clone object to avoid mutation
-  */
-  openEdit(d: Doctor): void {
-    this.editingDoctor = { ...d };
     this.showForm = true;
   }
 
-
-
-  /*
-  After successful save
-  */
   onFormSaved(): void {
 
     this.showForm = false;
+
     this.editingDoctor = null;
 
-    // Reload latest data
     this.loadDoctors();
 
-    this.showSuccess('Doctor saved!');
+    this.showSuccess(
+      'Doctor saved successfully!'
+    );
   }
 
-
-
-  /*
-  Cancel form
-  */
   onFormCancelled(): void {
+
     this.showForm = false;
+
     this.editingDoctor = null;
   }
 
-
-
-  /*
-  =========================================================
-  DELETE FLOW
-  =========================================================
-  */
-
-  /*
-  Step 1: Open confirmation
-  */
   confirmDelete(id: number): void {
+
     this.deleteConfirmId = id;
   }
 
-
-
-  /*
-  Step 2: Cancel delete
-  */
   cancelDelete(): void {
+
     this.deleteConfirmId = null;
   }
 
-
-
-  /*
-  Step 3: Perform delete
-  */
   doDelete(): void {
 
-    if (!this.deleteConfirmId) return;
+    if (!this.deleteConfirmId) {
 
-    this.doctorService.delete(this.deleteConfirmId).subscribe({
+      return;
+    }
 
-      // SUCCESS
-      next: () => {
+    this.doctorService
+      .delete(this.deleteConfirmId)
+      .subscribe({
 
-        this.deleteConfirmId = null;
+        next: () => {
 
-        this.loadDoctors();
+          this.deleteConfirmId = null;
 
-        this.showSuccess('Doctor deleted.');
-      },
+          this.loadDoctors();
 
-      // ERROR
-      error: (err) => {
+          this.showSuccess(
+            'Doctor deleted successfully!'
+          );
+        },
 
-        this.errorMessage =
-          err.error?.message || 'Delete failed.';
+        error: (err) => {
 
-        this.deleteConfirmId = null;
-      }
-    });
+          console.error(
+            'Doctor Delete Error',
+            err
+          );
+
+          this.errorMessage =
+
+            err.error?.message
+
+            ||
+
+            'Delete failed.';
+
+          this.deleteConfirmId = null;
+        }
+      });
   }
 
+  showSuccess(message: string): void {
 
-
-  /*
-  =========================================================
-  SUCCESS MESSAGE HANDLER
-  =========================================================
-  */
-  showSuccess(msg: string): void {
-
-    this.successMessage = msg;
+    this.successMessage = message;
 
     setTimeout(() => {
+
       this.successMessage = '';
+
     }, 3000);
   }
 }
