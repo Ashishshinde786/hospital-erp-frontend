@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { PatientService } from '../../core/services/patient.service';
 import { DoctorService } from '../../core/services/doctor.service';
 import { AppointmentService } from '../../core/services/appointment.service';
@@ -17,6 +18,7 @@ import { PharmacyService } from '../../core/services/pharmacy.service';
 })
 export class DashboardComponent implements OnInit {
   loading = true;
+  errorMessage = '';
 
   stats = {
     totalPatients: 0,
@@ -39,16 +41,20 @@ export class DashboardComponent implements OnInit {
     private pharmacyService: PharmacyService
   ) {}
 
-  ngOnInit(): void { this.loadDashboard(); }
+  ngOnInit(): void {
+    this.loadDashboard();
+  }
 
   loadDashboard(): void {
     this.loading = true;
+    this.errorMessage = '';
+
     forkJoin({
-      patients:     this.patientService.getAll(),
-      doctors:      this.doctorService.getAll(),
-      appointments: this.appointmentService.getAll(),
-      revenue:      this.billingService.getRevenue(),
-      lowStock:     this.pharmacyService.getLowStock(10)
+      patients:     this.patientService.getAll().pipe(catchError(() => of({ data: [] }))),
+      doctors:      this.doctorService.getAll().pipe(catchError(() => of({ data: [] }))),
+      appointments: this.appointmentService.getAll().pipe(catchError(() => of({ data: [] }))),
+      revenue:      this.billingService.getRevenue().pipe(catchError(() => of({ data: 0 }))),
+      lowStock:     this.pharmacyService.getLowStock(10).pipe(catchError(() => of({ data: [] })))
     }).subscribe({
       next: (results) => {
         this.stats.totalPatients     = results.patients.data?.length     || 0;
@@ -56,22 +62,19 @@ export class DashboardComponent implements OnInit {
         this.stats.totalAppointments = results.appointments.data?.length || 0;
         this.stats.totalRevenue      = results.revenue.data              || 0;
         this.stats.lowStockMedicines = results.lowStock.data?.length     || 0;
-        this.stats.availableDoctors  = results.doctors.data?.filter((d: any) => d.available).length || 0;
+        this.stats.availableDoctors  =
+          results.doctors.data?.filter((d: any) => d.available).length  || 0;
 
         this.recentPatients     = (results.patients.data     || []).slice(-5).reverse();
         this.recentAppointments = (results.appointments.data || []).slice(-5).reverse();
-        this.lowStockMedicines  = results.lowStock.data      || [];
+        this.lowStockMedicines  =  results.lowStock.data     || [];
+
         this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.errorMessage = 'Backend unreachable. Is it running on port 8080?';
+        this.loading = false;
+      }
     });
-  }
-
-  getStatusBadge(status: string): string {
-    const map: Record<string, string> = {
-      SCHEDULED: 'badge-info', CONFIRMED: 'badge-primary',
-      COMPLETED: 'badge-success', CANCELLED: 'badge-danger', NO_SHOW: 'badge-warning'
-    };
-    return map[status] || 'badge-muted';
   }
 }

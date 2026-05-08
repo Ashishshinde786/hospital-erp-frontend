@@ -12,6 +12,7 @@ import { Doctor } from '../../../core/models/models';
   styleUrls: ['./doctor-form.component.scss']
 })
 export class DoctorFormComponent implements OnInit {
+
   @Input() doctor: Doctor | null = null;
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
@@ -21,9 +22,9 @@ export class DoctorFormComponent implements OnInit {
   error = '';
 
   specializations = [
-    'Cardiology','Neurology','Orthopedics','Dermatology','Gynecology',
-    'Pediatrics','Ophthalmology','ENT','Psychiatry','General Medicine',
-    'Surgery','Radiology','Anesthesiology','Oncology','Urology'
+    'Cardiology', 'Neurology', 'Orthopedics', 'Dermatology', 'Gynecology',
+    'Pediatrics', 'Ophthalmology', 'ENT', 'Psychiatry', 'General Medicine',
+    'Surgery', 'Radiology', 'Anesthesiology', 'Oncology', 'Urology'
   ];
 
   constructor(private fb: FormBuilder, private doctorService: DoctorService) {}
@@ -42,7 +43,9 @@ export class DoctorFormComponent implements OnInit {
     });
   }
 
-  get isEdit(): boolean { return !!this.doctor?.id; }
+  get isEdit(): boolean {
+    return !!this.doctor?.id;
+  }
 
   onSubmit(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
