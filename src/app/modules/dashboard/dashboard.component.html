@@ -1,141 +1,161 @@
-<!-- src/app/modules/dashboard/dashboard.component.html -->
 <div class="dashboard">
 
-  <!-- Loading -->
-  <div class="loading-container" *ngIf="loading">
-    <div class="spinner spinner-primary"></div>
-    <span>Loading dashboard...</span>
+  <div class="alert alert-danger" *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
+
+  <!-- Stat cards render IMMEDIATELY with zeroes -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#dbeafe;">👥</div>
+      <div class="stat-content"><h3>{{ stats.totalPatients }}</h3><p>Total Patients</p></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#dcfce7;">👨‍⚕️</div>
+      <div class="stat-content">
+        <h3>{{ stats.totalDoctors }}</h3>
+        <p>Doctors <span class="text-muted" style="font-size:0.75rem;">({{ stats.availableDoctors }} available)</span></p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef3c7;">📅</div>
+      <div class="stat-content"><h3>{{ stats.totalAppointments }}</h3><p>Total Appointments</p></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#f0fdf4;">💰</div>
+      <div class="stat-content"><h3>₹{{ stats.totalRevenue | number:'1.0-0' }}</h3><p>Total Revenue</p></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
+      <div class="stat-content"><h3>{{ stats.lowStockMedicines }}</h3><p>Low Stock Alerts</p></div>
+    </div>
   </div>
 
-  <ng-container *ngIf="!loading">
+  <div class="dashboard-grid">
 
-    <!-- Stats Grid -->
-    <div class="stat-grid">
+    <!-- Recent Appointments -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📅 Recent Appointments</h3>
+        <a routerLink="/appointments" class="btn btn-ghost btn-sm">View All →</a>
+      </div>
 
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#dbeafe;">👥</div>
-        <div class="stat-content">
-          <h3>{{ stats.totalPatients }}</h3>
-          <p>Total Patients</p>
+      <!-- INLINE SKELETON -->
+      <div *ngIf="loadingAppointments" style="padding:0.5rem 0">
+        <div *ngFor="let r of skeletonRows5"
+          style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid #f0f0f0">
+          <div style="width:40px;height:14px;border-radius:4px;background:#e0e0e0"></div>
+          <div style="width:120px;height:14px;border-radius:4px;background:#e8e8e8"></div>
+          <div style="width:120px;height:14px;border-radius:4px;background:#efefef"></div>
+          <div style="flex:1;height:14px;border-radius:4px;background:#e0e0e0"></div>
+          <div style="width:70px;height:22px;border-radius:4px;background:#e8e8e8"></div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#dcfce7;">👨‍⚕️</div>
-        <div class="stat-content">
-          <h3>{{ stats.totalDoctors }}</h3>
-          <p>Doctors ({{ stats.availableDoctors }} available)</p>
+      <div class="table-container" *ngIf="!loadingAppointments">
+        <table *ngIf="recentAppointments.length > 0">
+          <thead>
+            <tr>
+              <th>#</th><th>Patient</th><th>Doctor</th>
+              <th>Specialization</th><th>Date &amp; Time</th><th>Reason</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of recentAppointments">
+              <td class="text-muted font-mono">{{ a.id }}</td>
+              <td class="font-bold">{{ a.patientName || '—' }}</td>
+              <td>Dr. {{ a.doctorName || '—' }}</td>
+              <td class="text-muted">{{ a.doctorSpecialization || '—' }}</td>
+              <td class="font-mono" style="font-size:0.8rem">
+                {{ a.appointmentDateTime | date:'dd MMM yyyy' }}<br/>
+                <span class="text-muted">{{ a.appointmentDateTime | date:'hh:mm a' }}</span>
+              </td>
+              <td class="text-muted"
+                style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                {{ a.reason || '—' }}
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadge(a.status)">{{ a.status || '—' }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty-state" *ngIf="recentAppointments.length === 0">
+          <div class="empty-icon">📅</div>
+          <h4>No appointments yet</h4>
+          <p>Book the first appointment to see it here.</p>
         </div>
       </div>
-
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#fef3c7;">📅</div>
-        <div class="stat-content">
-          <h3>{{ stats.totalAppointments }}</h3>
-          <p>Total Appointments</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#f0fdf4;">💰</div>
-        <div class="stat-content">
-          <h3>₹{{ stats.totalRevenue | number:'1.0-0' }}</h3>
-          <p>Total Revenue</p>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon" style="background:#fee2e2;">⚠️</div>
-        <div class="stat-content">
-          <h3>{{ stats.lowStockMedicines }}</h3>
-          <p>Low Stock Alerts</p>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Grid Layout -->
-    <div class="dashboard-grid">
+    <!-- Side Column -->
+    <div class="side-column">
 
-      <!-- Recent Appointments -->
+      <!-- Recent Patients -->
       <div class="card">
         <div class="card-header">
-          <h3>📅 Recent Appointments</h3>
-          <a routerLink="/appointments" class="btn btn-ghost btn-sm">View All →</a>
+          <h3>👥 Recent Patients</h3>
+          <a routerLink="/patients" class="btn btn-ghost btn-sm">View All →</a>
         </div>
-        <div class="table-container">
-          <table *ngIf="recentAppointments.length > 0">
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Date/Time</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let a of recentAppointments">
-                <td>{{ a.patientName }}</td>
-                <td>Dr. {{ a.doctorName }}</td>
-                <td>{{ a.appointmentDateTime | date:'dd MMM, hh:mm a' }}</td>
-                <td>
-                  <span class="badge" [ngClass]="getStatusBadge(a.status)">{{ a.status }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="empty-state" *ngIf="recentAppointments.length === 0">
-            <div class="empty-icon">📅</div>
-            <h4>No appointments yet</h4>
-          </div>
-        </div>
-      </div>
 
-      <!-- Side Column -->
-      <div class="side-column">
-
-        <!-- Recent Patients -->
-        <div class="card">
-          <div class="card-header">
-            <h3>👥 Recent Patients</h3>
-            <a routerLink="/patients" class="btn btn-ghost btn-sm">View All →</a>
-          </div>
-          <div class="patient-list">
-            <div class="patient-item" *ngFor="let p of recentPatients">
-              <div class="patient-avatar">{{ p.firstName.charAt(0) }}{{ p.lastName.charAt(0) }}</div>
-              <div class="patient-info">
-                <span class="patient-name">{{ p.firstName }} {{ p.lastName }}</span>
-                <span class="patient-meta">{{ p.gender }} · {{ p.bloodGroup || '—' }}</span>
-              </div>
-            </div>
-            <div class="empty-state" *ngIf="recentPatients.length === 0">
-              <div class="empty-icon">👥</div>
-              <h4>No patients yet</h4>
+        <!-- INLINE SKELETON -->
+        <div *ngIf="loadingPatients" style="padding:0.5rem 0">
+          <div *ngFor="let r of skeletonRows4"
+            style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid #f0f0f0">
+            <div style="width:36px;height:36px;border-radius:50%;background:#e0e0e0"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+              <div style="width:130px;height:13px;border-radius:4px;background:#e8e8e8"></div>
+              <div style="width:90px;height:11px;border-radius:4px;background:#efefef"></div>
             </div>
           </div>
         </div>
 
-        <!-- Low Stock Alerts -->
-        <div class="card" *ngIf="lowStockMedicines.length > 0">
-          <div class="card-header">
-            <h3>⚠️ Low Stock Medicines</h3>
-            <a routerLink="/pharmacy" class="btn btn-ghost btn-sm">Manage →</a>
-          </div>
-          <div class="low-stock-list">
-            <div class="low-stock-item" *ngFor="let m of lowStockMedicines">
-              <div class="medicine-info">
-                <span class="medicine-name">{{ m.name }}</span>
-                <span class="medicine-cat">{{ m.category || 'General' }}</span>
-              </div>
-              <span class="stock-badge" [class.critical]="m.stockQuantity < 5">
-                {{ m.stockQuantity }} left
+        <div class="patient-list" *ngIf="!loadingPatients">
+          <div class="patient-item" *ngFor="let p of recentPatients">
+            <div class="patient-avatar">{{ p.firstName.charAt(0) }}{{ p.lastName.charAt(0) }}</div>
+            <div class="patient-info">
+              <span class="patient-name">{{ p.firstName }} {{ p.lastName }}</span>
+              <span class="patient-meta">
+                {{ getAge(p.dateOfBirth) }} yrs · {{ p.gender || '—' }} · {{ p.bloodGroup || '—' }}
               </span>
             </div>
           </div>
+          <div class="empty-state" *ngIf="recentPatients.length === 0">
+            <div class="empty-icon">👥</div>
+            <h4>No patients yet</h4>
+          </div>
         </div>
-
       </div>
-    </div>
 
-  </ng-container>
+      <!-- Low Stock skeleton -->
+      <div class="card" *ngIf="loadingStock" style="padding:0.5rem 1rem">
+        <div *ngFor="let r of skeletonRows3"
+          style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid #f0f0f0">
+          <div style="flex:1;height:13px;border-radius:4px;background:#e8e8e8"></div>
+          <div style="width:60px;height:22px;border-radius:4px;background:#e0e0e0"></div>
+        </div>
+      </div>
+
+      <!-- Low Stock data -->
+      <div class="card" *ngIf="!loadingStock">
+        <div class="card-header">
+          <h3>{{ lowStockMedicines.length > 0 ? '⚠️ Low Stock Medicines' : '💊 Medicine Stock' }}</h3>
+          <a routerLink="/pharmacy" class="btn btn-ghost btn-sm">Manage →</a>
+        </div>
+        <div class="low-stock-list" *ngIf="lowStockMedicines.length > 0">
+          <div class="low-stock-item" *ngFor="let m of lowStockMedicines">
+            <div class="medicine-info">
+              <span class="medicine-name">{{ m.name }}</span>
+              <span class="medicine-cat">{{ m.category || 'General' }}</span>
+            </div>
+            <span class="stock-badge" [class.critical]="m.stockQuantity < 5">{{ m.stockQuantity }} left</span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="lowStockMedicines.length === 0">
+          <div class="empty-icon">✅</div>
+          <h4>All medicines well-stocked</h4>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>

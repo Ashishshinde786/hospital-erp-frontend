@@ -1,46 +1,119 @@
-<aside class="sidebar" [class.collapsed]="collapsed">
+<aside
+  class="sidebar"
+  [class.collapsed]="collapsed">
 
-  <!-- Brand -->
+  <!-- BRAND -->
   <div class="sidebar-brand">
-    <div class="brand-icon">🏥</div>
-    <div class="brand-text" *ngIf="!collapsed">
-      <span class="brand-name">Hospital ERP</span>
-      <span class="brand-sub">Management System</span>
+
+    <div class="brand-icon">
+      🏥
+    </div>
+
+    <div
+      class="brand-text"
+      *ngIf="!collapsed">
+
+      <span class="brand-name">
+        Hospital ERP
+      </span>
+
+      <span class="brand-sub">
+        Management System
+      </span>
     </div>
   </div>
 
-  <!-- Navigation -->
+
+
+  <!-- NAVIGATION -->
   <nav class="sidebar-nav">
+
     <ul>
+
       <li *ngFor="let item of navItems">
+
         <a
           [routerLink]="item.route"
           routerLinkActive="active"
-          [title]="collapsed ? item.label : ''"
           class="nav-link"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
+          [title]="collapsed ? item.label : ''">
+
+          <span class="nav-icon">
+
+            {{ item.icon }}
+
+          </span>
+
+          <span
+            class="nav-label"
+            *ngIf="!collapsed">
+
+            {{ item.label }}
+
+          </span>
         </a>
       </li>
     </ul>
   </nav>
 
-  <!-- User info at bottom -->
+
+
+  <!-- FOOTER -->
   <div class="sidebar-footer">
-    <div class="user-info" *ngIf="!collapsed">
-      <div class="user-avatar">{{ username.charAt(0).toUpperCase() }}</div>
+
+    <!-- USER INFO -->
+    <div
+      class="user-info"
+      *ngIf="!collapsed">
+
+      <div class="user-avatar">
+
+        {{ username.charAt(0).toUpperCase() }}
+
+      </div>
+
       <div class="user-details">
-        <span class="user-name">{{ username }}</span>
-        <span class="user-role">{{ role }}</span>
+
+        <span class="user-name">
+
+          {{ username }}
+
+        </span>
+
+        <span class="user-role">
+
+          {{ role }}
+
+        </span>
       </div>
     </div>
-    <div class="user-avatar small" *ngIf="collapsed">{{ username.charAt(0).toUpperCase() }}</div>
 
-    <button class="logout-btn" (click)="logout()" [title]="collapsed ? 'Logout' : ''">
+
+
+    <!-- COLLAPSED USER -->
+    <div
+      class="user-avatar small"
+      *ngIf="collapsed">
+
+      {{ username.charAt(0).toUpperCase() }}
+
+    </div>
+
+
+
+    <!-- LOGOUT -->
+    <button
+      class="logout-btn"
+      (click)="logout()"
+      [title]="collapsed ? 'Logout' : ''">
+
       <span>🚪</span>
-      <span *ngIf="!collapsed">Logout</span>
+
+      <span *ngIf="!collapsed">
+
+        Logout
+
+      </span>
     </button>
   </div>
-
 </aside>

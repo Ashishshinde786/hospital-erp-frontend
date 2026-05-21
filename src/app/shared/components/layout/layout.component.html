@@ -1,11 +1,29 @@
-<div class="layout" [class.sidebar-collapsed]="sidebarCollapsed">
-  <app-sidebar [collapsed]="sidebarCollapsed"></app-sidebar>
+<div
+  class="layout"
+  [class.sidebar-collapsed]="sidebarCollapsed">
 
+  <!-- Sidebar -->
+  <app-sidebar
+    [collapsed]="sidebarCollapsed">
+  </app-sidebar>
+
+
+
+  <!-- Main Content -->
   <div class="layout-main">
-    <app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
 
+    <!-- Navbar -->
+    <app-navbar
+      (toggleSidebar)="toggleSidebar()">
+    </app-navbar>
+
+
+
+    <!-- Routed Pages -->
     <main class="layout-content">
+
       <router-outlet></router-outlet>
+
     </main>
   </div>
 </div>
