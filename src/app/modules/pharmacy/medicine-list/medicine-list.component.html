@@ -1,15 +1,13 @@
-<!-- src/app/modules/pharmacy/medicine-list/medicine-list.component.html -->
 <div class="page-container">
 
   <div class="page-header">
     <div class="page-title">
       <h2>💊 Pharmacy — Medicine Inventory</h2>
-      <p>{{ medicines.length }} medicines in stock</p>
+      <p>{{ loading ? 'Loading...' : medicines.length + ' medicines in inventory' }}</p>
     </div>
     <button class="btn btn-primary" (click)="openCreate()">＋ Add Medicine</button>
   </div>
 
-  <!-- Inventory Stats -->
   <div class="pharmacy-stats">
     <div class="pharma-stat total">
       <div class="ps-icon">💊</div>
@@ -26,17 +24,22 @@
       <div class="ps-val">{{ expiredCount }}</div>
       <div class="ps-lbl">Expired</div>
     </div>
+    <div class="pharma-stat" style="background:#f0fdf4">
+      <div class="ps-icon">💰</div>
+      <div class="ps-val" style="font-size:1rem">₹{{ totalValue | number:'1.0-0' }}</div>
+      <div class="ps-lbl">Inventory Value</div>
+    </div>
   </div>
 
   <div class="alert alert-success" *ngIf="successMessage">✅ {{ successMessage }}</div>
   <div class="alert alert-danger"  *ngIf="errorMessage">⚠️ {{ errorMessage }}</div>
 
-  <!-- Toolbar -->
   <div class="toolbar">
     <div class="toolbar-left">
       <div class="search-bar">
         <span class="search-icon">🔍</span>
-        <input type="text" class="form-control" placeholder="Search medicine, manufacturer, category..."
+        <input type="text" class="form-control"
+          placeholder="Search name, manufacturer, category, batch..."
           [(ngModel)]="searchQuery" (input)="applySearch()" style="width:300px" />
       </div>
       <label class="toggle-filter">
@@ -45,29 +48,34 @@
       </label>
     </div>
     <div class="toolbar-right">
-      <span class="text-muted" style="font-size:0.85rem">Showing {{ filtered.length }} of {{ medicines.length }}</span>
+      <span class="text-muted" style="font-size:0.85rem">
+        Showing {{ filtered.length }} of {{ medicines.length }}
+      </span>
     </div>
   </div>
 
-  <!-- Table -->
   <div class="card">
-    <div class="loading-container" *ngIf="loading">
-      <div class="spinner spinner-primary"></div><span>Loading medicines...</span>
+
+    <!-- INLINE SKELETON -->
+    <div *ngIf="loading" style="padding:0.5rem 0">
+      <div *ngFor="let r of skeletonRows"
+        style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid #f0f0f0">
+        <div style="width:40px;height:14px;border-radius:4px;background:#e0e0e0"></div>
+        <div style="width:160px;height:14px;border-radius:4px;background:#e8e8e8"></div>
+        <div style="width:90px;height:14px;border-radius:4px;background:#efefef"></div>
+        <div style="flex:1;height:14px;border-radius:4px;background:#e0e0e0"></div>
+        <div style="width:70px;height:14px;border-radius:4px;background:#e8e8e8"></div>
+        <div style="width:80px;height:14px;border-radius:4px;background:#efefef"></div>
+      </div>
     </div>
 
     <div class="table-container" *ngIf="!loading">
       <table *ngIf="filtered.length > 0">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Medicine Name</th>
-            <th>Category</th>
-            <th>Manufacturer</th>
-            <th>Price (₹)</th>
-            <th>Stock</th>
-            <th>Expiry</th>
-            <th>Batch</th>
-            <th>Actions</th>
+            <th>#</th><th>Medicine Name</th><th>Category</th><th>Manufacturer</th>
+            <th>Price (₹)</th><th>Stock</th><th>Stock Value</th>
+            <th>Expiry</th><th>Batch #</th><th>Status</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -82,37 +90,40 @@
             <td class="font-mono font-bold">₹{{ m.price | number:'1.0-2' }}</td>
             <td>
               <div class="stock-cell">
-                <span class="stock-num" [class.low]="m.stockQuantity < 10" [class.critical]="m.stockQuantity < 5">
-                  {{ m.stockQuantity }}
+                <span class="stock-num"
+                  [class.low]="m.stockQuantity < 10"
+                  [class.critical]="m.stockQuantity < 5">
+                  {{ m.stockQuantity }} units
                 </span>
                 <button class="btn-icon" (click)="openStockUpdate(m)" title="Update Stock">📦</button>
               </div>
             </td>
+            <td class="font-mono text-muted" style="font-size:0.8rem">
+              ₹{{ (m.price * m.stockQuantity) | number:'1.0-0' }}
+            </td>
             <td>
               <span *ngIf="m.expiryDate">
-                <span class="badge badge-danger" *ngIf="isExpired(m.expiryDate)">
-                  EXPIRED {{ m.expiryDate | date:'MMM yyyy' }}
-                </span>
-                <span class="badge badge-warning" *ngIf="!isExpired(m.expiryDate) && isExpiringSoon(m.expiryDate)">
-                  {{ m.expiryDate | date:'MMM yyyy' }}
-                </span>
-                <span *ngIf="!isExpired(m.expiryDate) && !isExpiringSoon(m.expiryDate)" class="text-muted">
-                  {{ m.expiryDate | date:'MMM yyyy' }}
-                </span>
+                <span class="badge badge-danger" *ngIf="isExpired(m.expiryDate)">EXPIRED {{ m.expiryDate | date:'MMM yyyy' }}</span>
+                <span class="badge badge-warning" *ngIf="!isExpired(m.expiryDate) && isExpiringSoon(m.expiryDate)">Soon: {{ m.expiryDate | date:'MMM yyyy' }}</span>
+                <span class="text-muted" *ngIf="!isExpired(m.expiryDate) && !isExpiringSoon(m.expiryDate)">{{ m.expiryDate | date:'MMM yyyy' }}</span>
               </span>
               <span class="text-muted" *ngIf="!m.expiryDate">—</span>
             </td>
             <td class="font-mono text-muted" style="font-size:0.78rem">{{ m.batchNumber || '—' }}</td>
             <td>
+              <span class="badge badge-success" *ngIf="m.active">Active</span>
+              <span class="badge badge-muted"   *ngIf="!m.active">Inactive</span>
+            </td>
+            <td>
               <div class="actions-cell">
                 <button class="btn-icon" (click)="openEdit(m)" title="Edit">✏️</button>
-                <button class="btn-icon" (click)="confirmDelete(m.id!)" title="Deactivate" style="color:var(--danger)">🗑️</button>
+                <button class="btn-icon" (click)="confirmDelete(m.id!)" title="Deactivate"
+                  style="color:var(--danger)">🗑️</button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
-
       <div class="empty-state" *ngIf="filtered.length === 0">
         <div class="empty-icon">💊</div>
         <h4>No medicines found</h4>
@@ -121,14 +132,12 @@
     </div>
   </div>
 
-  <!-- Medicine Form Modal -->
   <app-medicine-form *ngIf="showForm"
     [medicine]="editingMedicine"
     (saved)="onFormSaved()"
     (cancelled)="onFormCancelled()">
   </app-medicine-form>
 
-  <!-- Stock Update Modal -->
   <div class="modal-overlay" *ngIf="showStockModal">
     <div class="modal" style="max-width:400px">
       <div class="modal-header">
@@ -138,32 +147,30 @@
       <div class="modal-body" *ngIf="stockMedicine">
         <div class="stock-update-info">
           <span class="font-bold">{{ stockMedicine.name }}</span>
-          <span class="text-muted">Current: {{ stockMedicine.stockQuantity }} units</span>
+          <span class="text-muted">Current stock: {{ stockMedicine.stockQuantity }} units</span>
         </div>
-        <div class="form-group mt-2">
+        <div class="form-group" style="margin-top:12px">
           <label>Quantity to Add</label>
-          <input type="number" class="form-control" [(ngModel)]="stockQuantity" min="1" placeholder="Enter quantity" />
-          <p class="text-muted mt-1" style="font-size:0.8rem">
-            New total will be: <strong>{{ stockMedicine.stockQuantity + (stockQuantity || 0) }}</strong> units
+          <input type="number" class="form-control"
+            [(ngModel)]="stockQuantity" min="1" placeholder="Enter quantity to add" />
+          <p class="text-muted" style="font-size:0.8rem;margin-top:6px">
+            New total: <strong>{{ stockMedicine.stockQuantity + (stockQuantity || 0) }}</strong> units
           </p>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" (click)="showStockModal = false">Cancel</button>
+        <button class="btn btn-ghost"   (click)="showStockModal = false">Cancel</button>
         <button class="btn btn-primary" (click)="confirmStockUpdate()">Update Stock</button>
       </div>
     </div>
   </div>
 
-  <!-- Delete Confirm -->
   <div class="modal-overlay" *ngIf="deleteConfirmId">
     <div class="modal" style="max-width:420px">
       <div class="modal-header"><h3>🗑️ Deactivate Medicine</h3></div>
-      <div class="modal-body">
-        <p>This will deactivate the medicine (soft delete). It won't appear in the list anymore.</p>
-      </div>
+      <div class="modal-body"><p>This will deactivate the medicine (soft delete).</p></div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-ghost"  (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="doDelete()">Deactivate</button>
       </div>
     </div>

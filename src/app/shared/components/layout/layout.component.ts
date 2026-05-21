@@ -1,113 +1,69 @@
-import { Component } from '@angular/core';
+// src/app/shared/components/layout/layout.component.ts
+//
+// FIX: This component was referenced in app.routes.ts but never defined.
+// It is the authenticated shell — holds Sidebar + Navbar + router-outlet.
+
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { NavbarComponent } from '../navbar/navbar.component';
-
-/*
-=========================================================
-COMPONENT: LayoutComponent
-=========================================================
-
-PURPOSE:
---------
-This is the MAIN LAYOUT (Shell Component) of the application.
-
-It controls:
-- Sidebar (navigation menu)
-- Navbar (top header)
-- Main content area (router-outlet)
-
----------------------------------------------------------
-
-ARCHITECTURE ROLE:
-------------------
-This component acts as a WRAPPER around all feature modules.
-
-Flow:
-AppComponent
-   ↓
-LayoutComponent (this)
-   ↓
-RouterOutlet → loads feature components
-
----------------------------------------------------------
-
-RESPONSIBILITIES:
------------------
-- Manage layout state (sidebar collapse/expand)
-- Coordinate interaction between Navbar and Sidebar
-- Provide consistent UI across all pages
-
----------------------------------------------------------
-
-KEY CONCEPTS USED:
-------------------
-- Standalone Component (Angular modern approach)
-- Component composition
-- Event handling (child → parent)
-- State management (UI state)
-- Angular Routing (RouterOutlet)
-
-=========================================================
-*/
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-layout',
-
-  /*
-  =========================================================
-  STANDALONE COMPONENT IMPORTS
-  =========================================================
-
-  Instead of NgModule, we directly import dependencies here
-  */
   standalone: true,
-  imports: [
-    RouterOutlet,      // For dynamic routing
-    SidebarComponent,  // Left navigation
-    NavbarComponent    // Top header
-  ],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, NavbarComponent],
+  template: `
+    <div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed()">
+      <!-- Persistent side navigation -->
+      <app-sidebar [collapsed]="sidebarCollapsed()"></app-sidebar>
 
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss']
+      <!-- Main content area -->
+      <div class="main-area">
+        <!-- Top bar with page title, clock, user pill -->
+        <app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
+
+        <!-- Routed page content -->
+        <main class="page-content">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg-base);
+    }
+
+    /* Push main area right by sidebar width */
+    .main-area {
+      margin-left: var(--sidebar-width, 240px);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left 0.3s ease;
+      min-width: 0;
+    }
+
+    /* When sidebar is collapsed, reduce margin */
+    .app-shell.sidebar-collapsed .main-area {
+      margin-left: 72px;
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+    }
+  `]
 })
 export class LayoutComponent {
+  // Angular Signal tracks sidebar open/closed state
+  sidebarCollapsed = signal(false);
 
-  /*
-  =========================================================
-  UI STATE: SIDEBAR
-  =========================================================
-
-  Controls:
-  - Sidebar width (expanded/collapsed)
-  - Layout responsiveness
-
-  Default: expanded (false)
-  */
-  sidebarCollapsed = false;
-
-
-
-  /*
-  =========================================================
-  ACTION: TOGGLE SIDEBAR
-  =========================================================
-
-  Triggered from:
-  - Navbar button (hamburger icon)
-
-  Flow:
-  Navbar → emits event → Layout → updates state → UI updates
-
-  =========================================================
-  */
   toggleSidebar(): void {
-
-    /*
-    Toggle boolean state
-    true  → collapse sidebar
-    false → expand sidebar
-    */
-    this.sidebarCollapsed = !this.sidebarCollapsed;
+    this.sidebarCollapsed.update(v => !v);
   }
 }
